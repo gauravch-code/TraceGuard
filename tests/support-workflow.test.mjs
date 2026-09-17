@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { runSupportWorkflow } from "../lib/support-workflow.ts";
+import { guardDraft, runSupportWorkflow } from "../lib/support-workflow.ts";
 
 function fakeClient() {
   const requests = [];
@@ -39,4 +39,14 @@ test("support agent marks an in-window request as successful draft", async () =>
 test("support agent rejects a model response that skipped its tool", async () => {
   const client = { responses: { async create() { return { output: [], usage: null }; } } };
   await assert.rejects(runSupportWorkflow({ question: "Could I get a refund?", daysSinceDelivery: 5, amountUsd: 20 }, client, [], Date.now()), /Policy tool was not called/);
+});
+
+test("unsafe refund and order-lookup claims are replaced", () => {
+  const refund = guardDraft("Your refund has been processed and is on its way.", true);
+  assert.equal(refund.replaced, true);
+  assert.match(refund.draft, /human review/i);
+  const lookup = guardDraft("I checked your order and verified the payment.", false);
+  assert.equal(lookup.replaced, true);
+  const safe = guardDraft("A team member will review the request.", false);
+  assert.equal(safe.replaced, false);
 });

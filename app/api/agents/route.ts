@@ -3,6 +3,7 @@ import { getDb } from "@/db";
 import { agents, agentKeys } from "@/db/schema";
 import { getChatGPTUser } from "@/app/chatgpt-auth";
 import { createKey, hashKey } from "@/app/api/run-contract";
+import { browserWriteError } from "@/app/api/browser-origin";
 
 export async function GET() {
   if (!await getChatGPTUser()) return Response.json({ error: "Sign in required" }, { status: 401 });
@@ -16,6 +17,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const writeError = browserWriteError(request, true);
+  if (writeError) return writeError;
   if (!await getChatGPTUser()) return Response.json({ error: "Sign in required" }, { status: 401 });
   try {
     const payload = await request.json() as { name?: string; owner?: string; model?: string };

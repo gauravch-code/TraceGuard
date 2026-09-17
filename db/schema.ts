@@ -26,6 +26,22 @@ export const runs = sqliteTable("runs", {
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 }, (table) => [index("idx_runs_created_at").on(table.createdAt), index("idx_runs_agent_created_at").on(table.agentId, table.createdAt)]);
 
+export const supportDailyUsage = sqliteTable("support_daily_usage", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  day: text("day").notNull(),
+  used: integer("used").notNull().default(0),
+});
+
+export const supportReviews = sqliteTable("support_reviews", {
+  runId: text("run_id").primaryKey().references(() => runs.id),
+  decision: text("decision").notNull(),
+  note: text("note").notNull().default(""),
+  reviewerId: text("reviewer_id").notNull(),
+  reviewerEmail: text("reviewer_email").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [index("idx_support_reviews_created_at").on(table.createdAt)]);
+
 export const incidentActions = sqliteTable("incident_actions", {
   incidentId: text("incident_id").primaryKey(),
   status: text("status").notNull().default("open"),

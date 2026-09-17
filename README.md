@@ -1,4 +1,8 @@
-# vinext-starter
+# TraceGuard
+
+TraceGuard is a private agent-operations MVP. It runs a fictional support-drafting agent with a deterministic sample refund-policy check, records traces in D1, and offers a human review queue. Registered external agents can ingest runs with one-time keys. It does not access real orders, send replies, or issue refunds. See [RUNS.md](RUNS.md) for setup and API usage.
+
+## Development platform
 
 A clean full-stack starter running on [vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and Drizzle support.
 

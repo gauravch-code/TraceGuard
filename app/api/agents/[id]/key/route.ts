@@ -3,8 +3,11 @@ import { getChatGPTUser } from "@/app/chatgpt-auth";
 import { createKey, hashKey } from "@/app/api/run-contract";
 import { getDb } from "@/db";
 import { agents, agentKeys } from "@/db/schema";
+import { browserWriteError } from "@/app/api/browser-origin";
 
-export async function POST(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const writeError = browserWriteError(request);
+  if (writeError) return writeError;
   if (!await getChatGPTUser()) return Response.json({ error: "Sign in required" }, { status: 401 });
   const id = Number((await params).id);
   if (!Number.isSafeInteger(id) || id < 1) return Response.json({ error: "Invalid agent" }, { status: 400 });
