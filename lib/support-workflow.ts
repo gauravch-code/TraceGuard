@@ -1,7 +1,7 @@
 import type OpenAI from "openai";
 import { toResponseInputItems } from "openai/lib/responses/ResponseInputItems";
 
-export const SUPPORT_MODEL = "gpt-4.1-mini";
+export const SUPPORT_MODEL = "gpt-4o-mini";
 export const REFUND_WINDOW_DAYS = 30;
 
 export type SupportInput = { question: string; daysSinceDelivery: number; amountUsd: number };
@@ -12,7 +12,7 @@ function estimatedCostUsd(...responses: OpenAI.Responses.Response[]) {
     const usage = response.usage;
     if (!usage) return total;
     const cached = usage.input_tokens_details?.cached_tokens ?? 0;
-    return total + ((usage.input_tokens - cached) * 0.4 + cached * 0.1 + usage.output_tokens * 1.6) / 1_000_000;
+    return total + ((usage.input_tokens - cached) * 0.15 + cached * 0.075 + usage.output_tokens * 0.6) / 1_000_000;
   }, 0);
 }
 

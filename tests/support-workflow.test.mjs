@@ -19,6 +19,7 @@ test("support agent calls policy tool and requires review after 30 days", async 
   assert.equal(result.status, "review");
   assert.equal(result.policy.humanReviewRequired, true);
   assert.equal(requests.length, 2);
+  assert.equal(requests[0].model, "gpt-4o-mini");
   assert.equal(requests[0].store, false);
   assert.equal(requests[0].tool_choice.name, "check_refund_policy");
   assert.equal(requests[1].tool_choice, "none");
