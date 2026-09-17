@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Activity, AlertTriangle, Bell, Bot, Box, BrainCircuit, Check, ChevronRight,
   CircleDollarSign, Clock3, Code2, Gauge, GitBranch, LayoutDashboard,
-  MoreHorizontal, Play, RefreshCw, Search, Settings, ShieldAlert, Sparkles,
+  MessageSquareText, MoreHorizontal, Play, RefreshCw, Search, Settings, ShieldAlert, Sparkles,
   TerminalSquare, Users, XCircle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +32,7 @@ type Run = {
 
 const navItems = [
   { label: "Overview", icon: LayoutDashboard },
+  { label: "Support agent", icon: MessageSquareText },
   { label: "Live runs", icon: Activity },
   { label: "Evaluations", icon: Gauge },
   { label: "Incidents", icon: ShieldAlert },
@@ -103,7 +104,7 @@ function NavigationMenu({ activeView, onChange }: { activeView: DashboardView; o
 export default function Home() {
   const [selectedRun, setSelectedRun] = useState<Run | null>(null);
   const [range, setRange] = useState("24h");
-  const [activeView, setActiveView] = useState<DashboardView>("Live runs");
+  const [activeView, setActiveView] = useState<DashboardView>("Support agent");
   const [evaluationOpen, setEvaluationOpen] = useState(false);
   const successRate = useMemo(() => Math.round((runs.filter((run) => run.status === "success").length / runs.length) * 100), []);
 
@@ -118,7 +119,7 @@ export default function Home() {
     register({
       name: "navigate_agentops",
       title: "Open AgentOps view",
-      description: "Navigate the visible Sentinel dashboard to one of its operational views.",
+      description: "Navigate the visible TraceGuard dashboard to one of its operational views.",
       inputSchema: { type: "object", properties: { view: { type: "string", enum: views } }, required: ["view"], additionalProperties: false },
       annotations: { readOnlyHint: true, untrustedContentHint: false },
       execute(input) {
@@ -149,7 +150,7 @@ export default function Home() {
         <SidebarHeader className="h-16 justify-center border-b border-white/8 px-3">
           <div className="flex items-center gap-3 overflow-hidden px-1">
             <span className="grid size-9 shrink-0 place-items-center rounded-md bg-[#8ef0ce] text-[#0b251d] shadow-[inset_0_0_0_1px_rgb(255_255_255/35%)]"><BrainCircuit className="size-[18px]" /></span>
-            <div className="min-w-0 group-data-[collapsible=icon]:hidden"><p className="truncate text-[15px] font-semibold text-white">Sentinel</p><p className="truncate text-xs text-white/45">Agent operations</p></div>
+            <div className="min-w-0 group-data-[collapsible=icon]:hidden"><p className="truncate text-[15px] font-semibold text-white">TraceGuard</p><p className="truncate text-xs text-white/45">Agent operations</p></div>
           </div>
         </SidebarHeader>
         <SidebarContent className="bg-[#101311] px-2 py-4">
@@ -177,7 +178,7 @@ export default function Home() {
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-zinc-200/80 bg-white/92 px-4 backdrop-blur md:px-7">
           <div className="flex min-w-0 items-center gap-3">
             <SidebarTrigger className="text-zinc-500" /><div className="hidden h-5 w-px bg-zinc-200 sm:block" />
-            <div className="min-w-0"><p className="truncate text-sm font-semibold text-zinc-900">Sentinel workspace</p><p className="hidden text-xs text-zinc-500 sm:block">{activeView === "Live runs" ? "Received agent runs" : "Preview and configuration"}</p></div>
+            <div className="min-w-0"><p className="truncate text-sm font-semibold text-zinc-900">TraceGuard workspace</p><p className="hidden text-xs text-zinc-500 sm:block">{activeView === "Live runs" ? "Received agent runs" : "Preview and configuration"}</p></div>
           </div>
           <div className="flex items-center gap-2">
             <div className="mr-1 hidden items-center gap-2 text-xs text-zinc-500 lg:flex"><span className="size-1.5 rounded-full bg-emerald-500" />{activeView === "Live runs" ? "Auto-refresh" : "MVP"}</div>
@@ -191,7 +192,7 @@ export default function Home() {
         </header>
 
         <main className="mx-auto w-full max-w-[1480px] p-4 md:p-7">
-          {activeView !== "Live runs" && activeView !== "Agents" && <p className="mb-4 border-l-2 border-amber-500 bg-amber-50 px-3 py-2 text-sm text-amber-900">Preview data: this view is not connected to production agents yet. Live runs and registered agents are real.</p>}
+          {activeView !== "Support agent" && activeView !== "Live runs" && activeView !== "Agents" && <p className="mb-4 border-l-2 border-amber-500 bg-amber-50 px-3 py-2 text-sm text-amber-900">Preview data: this view is not connected to production agents yet. Live runs and registered agents are real.</p>}
           {activeView === "Overview" ? <>
           <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>

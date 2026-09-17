@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Sentinel AgentOps",
+  title: "TraceGuard",
   description: "Observe, evaluate, and control production AI agents.",
   icons: {
     icon: "/favicon.svg",

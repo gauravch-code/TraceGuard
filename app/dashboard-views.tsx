@@ -16,8 +16,9 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LiveRuns as RealLiveRuns } from "@/app/live-runs";
+import { SupportAgent } from "@/app/support-agent";
 
-export type DashboardView = "Overview" | "Live runs" | "Evaluations" | "Incidents" | "Agents" | "Prompts";
+export type DashboardView = "Overview" | "Support agent" | "Live runs" | "Evaluations" | "Incidents" | "Agents" | "Prompts";
 
 const incidents = [
   { id: "INC-204", title: "PII detected in tool output", agent: "Support Copilot", severity: "Critical", runs: 4, opened: "12 min ago", owner: "Unassigned", detail: "A customer email address and partial card number were included in a downstream ticket payload. The action was blocked before delivery." },
@@ -127,6 +128,7 @@ function Prompts() {
 }
 
 export function DashboardViews({ view, onNavigate }: { view: Exclude<DashboardView, "Overview">; onNavigate: (view: DashboardView) => void }) {
+  if (view === "Support agent") return <SupportAgent onViewTrace={() => onNavigate("Live runs")} />;
   if (view === "Live runs") return <RealLiveRuns onRegister={() => onNavigate("Agents")} />;
   if (view === "Evaluations") return <Evaluations />;
   if (view === "Incidents") return <Incidents />;

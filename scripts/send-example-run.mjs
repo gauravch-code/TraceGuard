@@ -1,9 +1,9 @@
-const endpoint = process.env.SENTINEL_URL;
-const key = process.env.SENTINEL_AGENT_KEY;
-const agentId = Number(process.env.SENTINEL_AGENT_ID);
+const endpoint = process.env.TRACEGUARD_URL ?? process.env.SENTINEL_URL;
+const key = process.env.TRACEGUARD_AGENT_KEY ?? process.env.SENTINEL_AGENT_KEY;
+const agentId = Number(process.env.TRACEGUARD_AGENT_ID ?? process.env.SENTINEL_AGENT_ID);
 
 if (!endpoint || !key || !Number.isSafeInteger(agentId) || agentId < 1) {
-  console.error("Set SENTINEL_URL, SENTINEL_AGENT_ID, and SENTINEL_AGENT_KEY first.");
+  console.error("Set TRACEGUARD_URL, TRACEGUARD_AGENT_ID, and TRACEGUARD_AGENT_KEY first.");
   process.exit(1);
 }
 
