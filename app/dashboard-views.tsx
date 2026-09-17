@@ -1,42 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  Activity, AlertTriangle, ArrowRight, Bot, BrainCircuit, Check, CheckCircle2,
-  CircleDollarSign, Clock3, Code2, Copy, FileCheck2, Filter, Gauge, GitCompare,
-  History, KeyRound, Layers3, Play, Plus, Search, ShieldAlert, Sparkles,
-  TimerReset, UserRound, Wrench, XCircle,
+  ArrowRight, Bot, Check, CheckCircle2, CircleDollarSign, Code2, Copy,
+  FileCheck2, Gauge, GitCompare, KeyRound, Layers3, Play, Plus,
+  ShieldAlert, TimerReset, UserRound,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LiveRuns as RealLiveRuns } from "@/app/live-runs";
 
 export type DashboardView = "Overview" | "Live runs" | "Evaluations" | "Incidents" | "Agents" | "Prompts";
-
-const allRuns = [
-  ["run_8f2a", "Support Copilot", "Refund eligibility check", "Review", "71", "4.8s", "$0.042", "18 sec ago"],
-  ["run_8f29", "Research Analyst", "Competitor pricing brief", "Passed", "94", "12.1s", "$0.128", "41 sec ago"],
-  ["run_8f28", "Invoice Processor", "Extract vendor line items", "Failed", "38", "2.4s", "$0.011", "1 min ago"],
-  ["run_8f27", "Sales Qualifier", "Enrich inbound lead", "Passed", "91", "6.7s", "$0.057", "2 min ago"],
-  ["run_8f26", "Support Copilot", "Draft subscription response", "Passed", "96", "3.9s", "$0.035", "3 min ago"],
-  ["run_8f25", "Research Analyst", "Summarize market filings", "Passed", "89", "18.5s", "$0.164", "4 min ago"],
-  ["run_8f24", "Sales Qualifier", "Score enterprise opportunity", "Review", "68", "7.1s", "$0.063", "5 min ago"],
-  ["run_8f23", "Invoice Processor", "Match purchase order", "Passed", "98", "3.2s", "$0.018", "6 min ago"],
-];
-
-const agents = [
-  { name: "Support Copilot", owner: "Customer Experience", model: "GPT-5.2", runs: "8,491", success: 97.4, latency: "3.8s", status: "Healthy", version: "v2.8.4", icon: BrainCircuit, tone: "bg-teal-50 text-teal-700" },
-  { name: "Research Analyst", owner: "Strategy", model: "Claude Sonnet", runs: "3,208", success: 95.1, latency: "11.6s", status: "Healthy", version: "v1.6.2", icon: Sparkles, tone: "bg-violet-50 text-violet-700" },
-  { name: "Invoice Processor", owner: "Finance Ops", model: "GPT-4.1 mini", runs: "4,122", success: 91.8, latency: "2.7s", status: "Degraded", version: "v3.1.0", icon: FileCheck2, tone: "bg-amber-50 text-amber-700" },
-  { name: "Sales Qualifier", owner: "Revenue", model: "GPT-5.2", runs: "2,608", success: 96.2, latency: "6.4s", status: "Healthy", version: "v1.9.7", icon: UserRound, tone: "bg-sky-50 text-sky-700" },
-];
 
 const incidents = [
   { id: "INC-204", title: "PII detected in tool output", agent: "Support Copilot", severity: "Critical", runs: 4, opened: "12 min ago", owner: "Unassigned", detail: "A customer email address and partial card number were included in a downstream ticket payload. The action was blocked before delivery." },
@@ -61,29 +42,6 @@ function ToneBadge({ value }: { value: string }) {
   return <Badge variant="outline" className={`rounded-md ${tone}`}>{value}</Badge>;
 }
 
-function LiveRuns() {
-  const [query, setQuery] = useState("");
-  const [status, setStatus] = useState("all");
-  const filtered = useMemo(() => allRuns.filter((run) => {
-    const matchesQuery = `${run[0]} ${run[1]} ${run[2]}`.toLowerCase().includes(query.toLowerCase());
-    return matchesQuery && (status === "all" || run[3].toLowerCase() === status);
-  }), [query, status]);
-  return <>
-    <PageHeading eyebrow="Observability" title="Live runs" description="Follow every model decision, tool call, policy check, and outcome as it happens." action={<div className="flex items-center gap-2"><span className="flex h-9 items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 text-sm text-emerald-700"><span className="size-2 animate-pulse rounded-full bg-emerald-500" />Streaming live</span><Button variant="outline" className="bg-white"><History />Export</Button></div>} />
-    <section className="panel min-w-0">
-      <div className="flex flex-col gap-3 border-b border-zinc-200 p-4 md:flex-row md:items-center">
-        <div className="relative flex-1"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" /><Input value={query} onChange={(e) => setQuery(e.target.value)} className="bg-white pl-9" placeholder="Search by run, agent, or task" /></div>
-        <Select value={status} onValueChange={setStatus}><SelectTrigger className="w-full bg-white md:w-[160px]"><Filter /><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All statuses</SelectItem><SelectItem value="passed">Passed</SelectItem><SelectItem value="review">Review</SelectItem><SelectItem value="failed">Failed</SelectItem></SelectContent></Select>
-        <Select defaultValue="all"><SelectTrigger className="w-full bg-white md:w-[190px]"><Bot /><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All agents</SelectItem><SelectItem value="support">Support Copilot</SelectItem><SelectItem value="research">Research Analyst</SelectItem><SelectItem value="invoice">Invoice Processor</SelectItem></SelectContent></Select>
-      </div>
-      <Table><TableHeader><TableRow className="bg-zinc-50/80"><TableHead className="pl-5 text-xs text-zinc-500">Run</TableHead><TableHead className="text-xs text-zinc-500">Agent / task</TableHead><TableHead className="text-xs text-zinc-500">Status</TableHead><TableHead className="text-xs text-zinc-500">Score</TableHead><TableHead className="text-xs text-zinc-500">Latency</TableHead><TableHead className="text-xs text-zinc-500">Cost</TableHead><TableHead className="pr-5 text-right text-xs text-zinc-500">Started</TableHead></TableRow></TableHeader><TableBody>
-        {filtered.map((run) => <TableRow key={run[0]} className="cursor-pointer hover:bg-[#f7faf8]" onClick={() => toast.info(`Opening ${run[0]} trace`)}><TableCell className="pl-5 font-mono text-xs text-zinc-500">{run[0]}</TableCell><TableCell><p className="text-sm font-medium text-zinc-900">{run[1]}</p><p className="text-xs text-zinc-500">{run[2]}</p></TableCell><TableCell><ToneBadge value={run[3]} /></TableCell><TableCell><div className="flex items-center gap-2"><Progress value={Number(run[4])} className="h-1.5 w-16 bg-zinc-100 [&_[data-slot=progress-indicator]]:bg-[#2e8b7d]" /><span className="text-xs font-medium">{run[4]}</span></div></TableCell><TableCell className="text-xs text-zinc-600">{run[5]}</TableCell><TableCell className="text-xs text-zinc-600">{run[6]}</TableCell><TableCell className="pr-5 text-right text-xs text-zinc-500">{run[7]}</TableCell></TableRow>)}
-      </TableBody></Table>
-      {filtered.length === 0 && <div className="grid min-h-52 place-items-center p-8 text-center"><div><Search className="mx-auto size-7 text-zinc-300" /><p className="mt-3 text-sm font-medium text-zinc-700">No matching runs</p><p className="mt-1 text-xs text-zinc-500">Try a different search or status.</p></div></div>}
-    </section>
-  </>;
-}
-
 function Evaluations() {
   return <>
     <PageHeading eyebrow="Quality system" title="Evaluations" description="Measure task quality, policy compliance, and regressions before they reach production." action={<Button onClick={() => toast.success("Evaluation queued for 240 cases") } className="bg-[#101311] hover:bg-[#252a27]"><Play />Run evaluation</Button>} />
@@ -102,7 +60,7 @@ function Incidents() {
   const [selected, setSelected] = useState(incidents[0]);
   const [resolved, setResolved] = useState<string[]>([]);
   useEffect(() => {
-    fetch("/api/incidents").then((response) => response.ok ? response.json() : null).then((data) => {
+    fetch("/api/incidents").then((response) => response.ok ? response.json() as Promise<{ incidents: Array<{ status: string; incidentId: string }> }> : null).then((data) => {
       if (data?.incidents) setResolved(data.incidents.filter((item: { status: string }) => item.status === "resolved").map((item: { incidentId: string }) => item.incidentId));
     }).catch(() => undefined);
   }, []);
@@ -122,28 +80,42 @@ function Incidents() {
 
 function Agents() {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [issuedKey, setIssuedKey] = useState("");
+  const [keyAgentId, setKeyAgentId] = useState<number | null>(null);
   const [customAgents, setCustomAgents] = useState<Array<{ id: number; name: string; owner: string; model: string }>>([]);
   const [name, setName] = useState("");
   const [owner, setOwner] = useState("");
   const [model, setModel] = useState("GPT-5.2");
   useEffect(() => {
-    fetch("/api/agents").then((response) => response.ok ? response.json() : null).then((data) => { if (data?.agents) setCustomAgents(data.agents); }).catch(() => undefined);
+    fetch("/api/agents").then((response) => response.ok ? response.json() as Promise<{ agents: Array<{ id: number; name: string; owner: string; model: string }> }> : null).then((data) => { if (data?.agents) setCustomAgents(data.agents); }).catch(() => undefined);
   }, []);
   const registeredAgents = customAgents.map((agent) => ({ ...agent, runs: "0", success: 100, latency: "--", status: "Healthy", version: "v1.0.0", icon: Bot, tone: "bg-emerald-50 text-emerald-700" }));
   async function registerAgent() {
     if (!name.trim() || !owner.trim()) { toast.error("Add an agent name and owner team"); return; }
     try {
       const response = await fetch("/api/agents", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, owner, model }) });
-      const data = await response.json();
+      const data = await response.json() as { agent: { id: number; name: string; owner: string; model: string }; key: string; error?: string };
       if (!response.ok) throw new Error(data.error ?? "Registration failed");
       setCustomAgents((items) => [data.agent, ...items]);
       setName(""); setOwner(""); setModel("GPT-5.2"); setDialogOpen(false);
-      toast.success("Agent registered. SDK key created.");
+      setIssuedKey(data.key); setKeyAgentId(data.agent.id);
+      toast.success("Agent registered. Save its key now.");
     } catch (error) { toast.error(error instanceof Error ? error.message : "Could not register the agent"); }
+  }
+  async function rotateKey(id: number) {
+    if (!window.confirm("Create a new key? The previous key will stop working.")) return;
+    try {
+      const response = await fetch(`/api/agents/${id}/key`, { method: "POST" });
+      const data = await response.json() as { key: string; error?: string };
+      if (!response.ok) throw new Error(data.error ?? "Could not create key");
+      setIssuedKey(data.key); setKeyAgentId(id);
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Could not create key"); }
   }
   return <>
     <PageHeading eyebrow="Agent registry" title="Agents" description="Ownership, models, tools, risk posture, and production health in one place." action={<Dialog open={dialogOpen} onOpenChange={setDialogOpen}><DialogTrigger asChild><Button className="bg-[#101311] hover:bg-[#252a27]"><Plus />Register agent</Button></DialogTrigger><DialogContent><DialogHeader><DialogTitle>Register an agent</DialogTitle><DialogDescription>Add a production agent to start receiving traces and evaluations.</DialogDescription></DialogHeader><div className="space-y-4 py-2"><div><label className="mb-1.5 block text-sm font-medium">Agent name</label><Input value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Claims Copilot" /></div><div><label className="mb-1.5 block text-sm font-medium">Owner team</label><Input value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="e.g. Operations" /></div><div><label className="mb-1.5 block text-sm font-medium">Default model</label><Select value={model} onValueChange={setModel}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="GPT-5.2">GPT-5.2</SelectItem><SelectItem value="Claude Sonnet">Claude Sonnet</SelectItem><SelectItem value="Gemini 2.5 Pro">Gemini 2.5 Pro</SelectItem></SelectContent></Select></div></div><DialogFooter><Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button><Button onClick={registerAgent}><KeyRound />Register & create key</Button></DialogFooter></DialogContent></Dialog>} />
-    <div className="grid gap-4 md:grid-cols-2">{[...registeredAgents, ...agents].map((agent) => <section key={agent.name} className="panel"><div className="flex items-start gap-4 p-5"><span className={`grid size-10 shrink-0 place-items-center rounded-md ${agent.tone}`}><agent.icon className="size-5" /></span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h2 className="text-base font-semibold text-zinc-950">{agent.name}</h2><ToneBadge value={agent.status} /></div><p className="mt-1 text-xs text-zinc-500">{agent.owner} · {agent.model} · {agent.version}</p></div><Button variant="ghost" size="icon-sm" aria-label={`Open ${agent.name}`}><ArrowRight /></Button></div><div className="grid grid-cols-3 gap-px border-y border-zinc-200 bg-zinc-200"><div className="bg-zinc-50 p-4"><p className="text-xs text-zinc-500">Runs</p><p className="mt-1 font-semibold">{agent.runs}</p></div><div className="bg-zinc-50 p-4"><p className="text-xs text-zinc-500">Success</p><p className="mt-1 font-semibold">{agent.success}%</p></div><div className="bg-zinc-50 p-4"><p className="text-xs text-zinc-500">p95 latency</p><p className="mt-1 font-semibold">{agent.latency}</p></div></div><div className="p-5"><div className="mb-2 flex items-center justify-between text-xs"><span className="text-zinc-500">Reliability target</span><span className="font-medium text-zinc-700">{agent.success}% / 95%</span></div><Progress value={agent.success} className="h-1.5 bg-zinc-100 [&_[data-slot=progress-indicator]]:bg-[#2e8b7d]" /><div className="mt-4 flex items-center gap-4 text-xs text-zinc-500"><span className="flex items-center gap-1.5"><Wrench className="size-3.5" />{agent.name === "Support Copilot" ? 7 : 4} tools</span><span className="flex items-center gap-1.5"><Activity className="size-3.5" />{agent.runs === "0" ? "Awaiting first run" : "Seen 18s ago"}</span></div></div></section>)}</div>
+    <div className="mb-4 text-xs text-zinc-500">Registered agents below are real. Example agents and their metrics remain sample data.</div>
+    <div className="grid gap-4 md:grid-cols-2">{registeredAgents.map((agent) => <section key={agent.id} className="panel p-5"><div className="flex items-center gap-3"><span className={`grid size-10 shrink-0 place-items-center rounded-md ${agent.tone}`}><agent.icon className="size-5" /></span><div className="min-w-0 flex-1"><h2 className="font-semibold">{agent.name}</h2><p className="text-xs text-zinc-500">{agent.owner} · {agent.model}</p></div></div><div className="mt-4 flex items-center justify-between border-t border-zinc-100 pt-4"><span className="text-xs text-zinc-500">Agent ID: {agent.id}</span><Button variant="outline" size="sm" onClick={() => void rotateKey(agent.id)}><KeyRound />Create new key</Button></div></section>)}</div>
+    <Dialog open={Boolean(issuedKey)} onOpenChange={(open) => { if (!open) { setIssuedKey(""); setKeyAgentId(null); } }}><DialogContent><DialogHeader><DialogTitle>Agent key created</DialogTitle><DialogDescription>Save this key now. It will not be shown again. Creating a new key invalidates the previous one.</DialogDescription></DialogHeader><div className="space-y-3"><p className="text-sm">Agent ID: <strong>{keyAgentId}</strong></p><code className="block break-all rounded-md bg-zinc-100 p-3 text-xs">{issuedKey}</code><Button variant="outline" onClick={async () => { await navigator.clipboard.writeText(issuedKey); toast.success("Key copied"); }}><Copy />Copy key</Button><p className="text-xs text-zinc-500">Use this as the Bearer token when posting to /api/runs. Keep it out of client code and source control.</p></div></DialogContent></Dialog>
   </>;
 }
 
@@ -154,8 +126,8 @@ function Prompts() {
   </>;
 }
 
-export function DashboardViews({ view }: { view: Exclude<DashboardView, "Overview"> }) {
-  if (view === "Live runs") return <LiveRuns />;
+export function DashboardViews({ view, onNavigate }: { view: Exclude<DashboardView, "Overview">; onNavigate: (view: DashboardView) => void }) {
+  if (view === "Live runs") return <RealLiveRuns onRegister={() => onNavigate("Agents")} />;
   if (view === "Evaluations") return <Evaluations />;
   if (view === "Incidents") return <Incidents />;
   if (view === "Agents") return <Agents />;

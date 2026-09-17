@@ -9,6 +9,23 @@ export const agents = sqliteTable("agents", {
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
+export const agentKeys = sqliteTable("agent_keys", {
+  agentId: integer("agent_id").primaryKey().references(() => agents.id),
+  keyHash: text("key_hash").notNull().unique(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const runs = sqliteTable("runs", {
+  id: text("id").primaryKey(),
+  agentId: integer("agent_id").notNull().references(() => agents.id),
+  task: text("task").notNull(),
+  status: text("status").notNull(),
+  durationMs: integer("duration_ms").notNull(),
+  costUsd: integer("cost_microusd").notNull().default(0),
+  stepsJson: text("steps_json").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [index("idx_runs_created_at").on(table.createdAt), index("idx_runs_agent_created_at").on(table.agentId, table.createdAt)]);
+
 export const incidentActions = sqliteTable("incident_actions", {
   incidentId: text("incident_id").primaryKey(),
   status: text("status").notNull().default("open"),

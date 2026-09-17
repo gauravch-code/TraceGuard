@@ -32,9 +32,9 @@ type Run = {
 
 const navItems = [
   { label: "Overview", icon: LayoutDashboard },
-  { label: "Live runs", icon: Activity, count: "12" },
+  { label: "Live runs", icon: Activity },
   { label: "Evaluations", icon: Gauge },
-  { label: "Incidents", icon: ShieldAlert, count: "3" },
+  { label: "Incidents", icon: ShieldAlert },
   { label: "Agents", icon: Bot },
   { label: "Prompts", icon: GitBranch },
 ] as const;
@@ -91,7 +91,6 @@ function NavigationMenu({ activeView, onChange }: { activeView: DashboardView; o
               className="h-10 text-white/60 hover:bg-white/7 hover:text-white data-[active=true]:bg-white/10 data-[active=true]:text-white"
             >
               <item.icon className="size-4" /><span>{item.label}</span>
-              {item.count && <span className="ml-auto rounded bg-white/8 px-1.5 py-0.5 text-[11px] text-white/55">{item.count}</span>}
             </SidebarMenuButton>
           </TooltipTrigger>
           <TooltipContent side="right">{item.label}</TooltipContent>
@@ -104,7 +103,7 @@ function NavigationMenu({ activeView, onChange }: { activeView: DashboardView; o
 export default function Home() {
   const [selectedRun, setSelectedRun] = useState<Run | null>(null);
   const [range, setRange] = useState("24h");
-  const [activeView, setActiveView] = useState<DashboardView>("Overview");
+  const [activeView, setActiveView] = useState<DashboardView>("Live runs");
   const [evaluationOpen, setEvaluationOpen] = useState(false);
   const successRate = useMemo(() => Math.round((runs.filter((run) => run.status === "success").length / runs.length) * 100), []);
 
@@ -178,10 +177,10 @@ export default function Home() {
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-zinc-200/80 bg-white/92 px-4 backdrop-blur md:px-7">
           <div className="flex min-w-0 items-center gap-3">
             <SidebarTrigger className="text-zinc-500" /><div className="hidden h-5 w-px bg-zinc-200 sm:block" />
-            <div className="min-w-0"><p className="truncate text-sm font-semibold text-zinc-900">Production workspace</p><p className="hidden text-xs text-zinc-500 sm:block">All systems monitored</p></div>
+            <div className="min-w-0"><p className="truncate text-sm font-semibold text-zinc-900">Sentinel workspace</p><p className="hidden text-xs text-zinc-500 sm:block">{activeView === "Live runs" ? "Received agent runs" : "Preview and configuration"}</p></div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="mr-1 hidden items-center gap-2 text-xs text-zinc-500 lg:flex"><span className="size-1.5 rounded-full bg-emerald-500 shadow-[0_0_0_3px_rgb(16_185_129/12%)]" />Live sync</div>
+            <div className="mr-1 hidden items-center gap-2 text-xs text-zinc-500 lg:flex"><span className="size-1.5 rounded-full bg-emerald-500" />{activeView === "Live runs" ? "Auto-refresh" : "MVP"}</div>
             <Select value={range} onValueChange={setRange}>
               <SelectTrigger size="sm" className="w-[112px] bg-white"><Clock3 className="size-3.5" /><SelectValue /></SelectTrigger>
               <SelectContent><SelectItem value="1h">Last hour</SelectItem><SelectItem value="24h">Last 24h</SelectItem><SelectItem value="7d">Last 7 days</SelectItem></SelectContent>
@@ -192,6 +191,7 @@ export default function Home() {
         </header>
 
         <main className="mx-auto w-full max-w-[1480px] p-4 md:p-7">
+          {activeView !== "Live runs" && activeView !== "Agents" && <p className="mb-4 border-l-2 border-amber-500 bg-amber-50 px-3 py-2 text-sm text-amber-900">Preview data: this view is not connected to production agents yet. Live runs and registered agents are real.</p>}
           {activeView === "Overview" ? <>
           <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
@@ -260,7 +260,7 @@ export default function Home() {
               </TableBody>
             </Table>
           </section>
-          </> : <DashboardViews view={activeView} />}
+          </> : <DashboardViews view={activeView} onNavigate={setActiveView} />}
         </main>
       </SidebarInset>
 
