@@ -7,15 +7,7 @@ The run ingestion API stores submitted runs and their trace steps in D1. The exa
 3. Run `node scripts/send-example-run.mjs` to send a clearly labeled demonstration trace.
 4. Open **Live runs**. The row should appear within 8 seconds; select it to inspect the submitted steps.
 
-For local development, run `npm run build`, then apply the three SQL files to the local D1 database in order before registering an agent:
-
-```powershell
-node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_black_crystal.sql
-node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0001_parched_omega_flight.sql
-node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0002_mighty_warpath.sql
-```
-
-Apply each local migration only once. Hosted publishing applies pending migrations separately.
+For local development, run `npm run setup:local` once after `npm ci`. It builds the Worker and applies pending SQL migrations idempotently. Hosted publishing applies production migrations separately.
 
 For a real agent, POST JSON to `/api/runs` with `Authorization: Bearer <agent key>` and `Content-Type: application/json`:
 
@@ -42,6 +34,6 @@ Open **Support agent**, enter fictional order details, and run it. The 30-day re
 
 Every completed support draft appears in **Review queue**, where a signed-in reviewer can approve the draft or request changes with a note. A review decision is recorded once, with reviewer identity and time; it does not send the reply or issue a refund. The support endpoint allows at most 20 runs per signed-in user per UTC day to bound model spending. Failed model requests count toward that limit.
 
-`OPENAI_API_KEY` must be set as a server-side Site secret (or local development environment variable) before the Run button is enabled. Do not put the key in browser code or this repository. The OpenAI API request uses `store: false`. The displayed cost is an estimate from token usage, not a billing record. The former `SENTINEL_*` example-sender environment variable names still work for compatibility; new setup should use `TRACEGUARD_*`.
+`OPENAI_API_KEY` must be set as a server-side Site secret (or in ignored `.env.local` for development) before the Run button is enabled. Each clone owner uses their own key. Do not put the key in browser code or this repository. The OpenAI API request uses `store: false`. The displayed cost is an estimate from token usage, not a billing record. The former `SENTINEL_*` example-sender environment variable names still work for compatibility; new setup should use `TRACEGUARD_*`.
 
 This remains a controlled pilot: it has no real order connector, outbound messaging, refund action, automated evaluation, incident detection, retention policy, or multi-tenant authorization. Use fictional data only.
