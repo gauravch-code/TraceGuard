@@ -9,8 +9,8 @@ This is a functional pilot, not a production customer-support system. It does **
 Requires Node.js 22.13+ and npm on Windows, macOS, or Linux. Each person runs a separate local D1 database and supplies **their own** OpenAI Platform API key; no shared key is included.
 
 ```sh
-git clone <your-GitHub-repository-URL>
-cd <repository-folder>
+git clone https://github.com/gauravch-code/TraceGuard.git
+cd TraceGuard
 npm ci
 npm run setup:local
 ```
@@ -41,6 +41,6 @@ The support endpoint has a 20-run daily limit per signed-in user to bound spendi
 
 `app/` holds the UI and API routes, `db/` the D1 schema, `drizzle/` the SQL migrations, and `scripts/` the setup and example sender. `npm run lint` and `npm run build` validate the source. Local database files under `.wrangler/` and all `.env.local` values are ignored by Git.
 
-The checked-in `.openai/hosting.json` identifies this project's existing private Sites deployment. It is not needed for local development beyond the `DB` binding name. Fork owners who publish their **own** Site should replace its `project_id` and configure their own database binding and server-side `OPENAI_API_KEY` secret; cloning does not grant access to the original deployment. This repository currently has no GitHub remote configured, so its owner must create/push a GitHub repository before sharing a clone URL.
+The checked-in `.openai/hosting.json` identifies this project's existing private Sites deployment. It is not needed for local development beyond the `DB` binding name. Fork owners who publish their **own** Site should replace its `project_id` and configure their own database binding and server-side `OPENAI_API_KEY` secret; cloning does not grant access to the original deployment.
 
 See [RUNS.md](RUNS.md) for the ingestion API and the pilot's limitations.
