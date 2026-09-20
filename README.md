@@ -2,6 +2,8 @@
 
 TraceGuard is an agent-operations tool for recording AI-agent runs, inspecting their steps, and reviewing support drafts. Its built-in support agent is a working example: it checks a fictional 30-day refund policy with a deterministic tool, asks an OpenAI model to draft a reply, and stores the trace for human review. Registered external agents can submit their own runs through the ingestion API.
 
+**[Open the interactive demo](https://gauravch-code.github.io/TraceGuard/)** · No signup, API key, or model calls required.
+
 This is a functional pilot, not a production customer-support system. It does **not** read real orders, send messages, or issue refunds. Evaluation, automatic incident detection, retention controls, and tenant isolation are not implemented. Use fictional or non-sensitive data only.
 
 ## Clone and run
