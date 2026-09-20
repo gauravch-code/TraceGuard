@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import {
-  Activity, AlertTriangle, ArrowRight, BarChart3, Bot, Check, CheckCircle2,
+  Activity, AlertTriangle, ArrowRight, BarChart3, BookOpen, Bot, Check, CheckCircle2,
   ChevronRight, CircleDot, ClipboardCheck, Clock3, Code2, Copy, Database,
   ExternalLink, FileSearch, Filter, Gauge, GitFork, KeyRound, LayoutDashboard,
   Menu, MoreHorizontal, Play, RefreshCw, RotateCcw, Search,
@@ -198,6 +198,60 @@ function ConnectModal({ close, notify }: { close: () => void; notify: (text: str
   return <div className="modal-layer" role="dialog" aria-modal="true"><button className="modal-scrim" onClick={close} aria-label="Close modal" /><section className="modal"><header><span className="modal-icon"><KeyRound /></span><div><h2>Connect an agent</h2><p>Send your first trace in a few lines.</p></div><button className="icon-button" aria-label="Close integration dialog" onClick={close}><X /></button></header><div className="modal-body"><div className="sdk-tabs"><button className="active">TypeScript</button><button>Python</button><button>cURL</button></div><pre><code>{snippet}</code><button className="copy-button" onClick={copy} title="Copy snippet"><Copy size={15} /></button></pre><div className="modal-note"><ShieldCheck size={16} /><span>Demo only. No endpoint or credential is created here. Clone the repository to connect a real agent.</span></div></div><footer><a href="https://github.com/gauravch-code/TraceGuard" target="_blank" rel="noreferrer" className="secondary-button"><GitFork size={15} />Open repository</a><button className="primary-button" onClick={close}>Done</button></footer></section></div>;
 }
 
+function WelcomeGuide({ close, start }: { close: () => void; start: () => void }) {
+  return <div className="guide-layer" role="dialog" aria-modal="true" aria-labelledby="guide-title">
+    <div className="guide-backdrop" />
+    <section className="welcome-guide">
+      <div className="guide-copy">
+        <span className="guide-kicker"><Sparkles size={14} />Interactive product tour</span>
+        <h2 id="guide-title">See what your AI agent actually did.</h2>
+        <p>TraceGuard is an operations console for AI agents. It records each run so you can understand the decisions, tools, failures, cost, and human approvals behind the final output.</p>
+        <div className="guide-outcomes">
+          <div><span><Activity /></span><p><strong>Observe</strong>Reconstruct every execution step.</p></div>
+          <div><span><AlertTriangle /></span><p><strong>Investigate</strong>Find the exact point a run failed.</p></div>
+          <div><span><ClipboardCheck /></span><p><strong>Control</strong>Route uncertain outputs to people.</p></div>
+        </div>
+        <div className="guide-actions"><button className="guide-skip" onClick={close}>Explore on my own</button><button className="guide-start" onClick={start}>Start the 90-second tour <ArrowRight size={16} /></button></div>
+      </div>
+      <div className="guide-visual" aria-label="Example AI agent execution trace">
+        <div className="guide-window">
+          <div className="guide-window-bar"><span /><span /><span /><small>run_7f2a9c81</small></div>
+          <div className="guide-window-head"><div><small>Research Analyst</small><strong>Compare indexing strategies</strong></div><StatusBadge status="success" /></div>
+          <div className="guide-trace">
+            <div><span><MessageIcon kind="input" /></span><p><strong>Task received</strong><small>Compare HNSW and IVF for 10M documents</small></p><time>0ms</time></div>
+            <div><span><MessageIcon kind="model" /></span><p><strong>Plan generated</strong><small>Compare recall, memory, and latency</small></p><time>240ms</time></div>
+            <div><span><MessageIcon kind="tool" /></span><p><strong>Sources retrieved</strong><small>8 technical sources ranked</small></p><time>610ms</time></div>
+            <div><span><MessageIcon kind="policy" /></span><p><strong>Citation check</strong><small>All claims mapped to a source</small></p><time>1.4s</time></div>
+            <div><span><MessageIcon kind="output" /></span><p><strong>Result delivered</strong><small>Recommendation ready for review</small></p><time>1.8s</time></div>
+          </div>
+          <div className="guide-window-foot"><span>5 steps recorded</span><span>1.84s</span><span>$0.0042</span></div>
+        </div>
+      </div>
+    </section>
+  </div>;
+}
+
+function MessageIcon({ kind }: { kind: Step["kind"] }) {
+  return kind === "model" ? <Sparkles /> : kind === "tool" ? <Terminal /> : kind === "policy" ? <ShieldCheck /> : kind === "output" ? <Check /> : <ArrowRight />;
+}
+
+const tourStops: Array<{ view: View; label: string; title: string; copy: string }> = [
+  { view: "lab", label: "Run a workflow", title: "Watch an execution unfold", copy: "Choose any scenario and start the simulation. TraceGuard streams the model, tool, policy, and output steps in the order they happened." },
+  { view: "runs", label: "Inspect evidence", title: "Reconstruct any run", copy: "Open a row to inspect its complete timeline, latency, model, outcome, and estimated cost. Search and filters help isolate the run you need." },
+  { view: "reviews", label: "Add human judgment", title: "Resolve uncertain outputs", copy: "Confidence and policy thresholds route risky work here. Approve it or request changes while preserving the decision trail." },
+  { view: "agents", label: "Instrument your fleet", title: "Bring any agent", copy: "TraceGuard is not tied to one use case. Register research, document, coding, support, or custom agents through the ingestion API." },
+];
+
+function TourCoach({ step, next, close }: { step: number; next: () => void; close: () => void }) {
+  const stop = tourStops[step];
+  return <aside className="tour-coach" aria-live="polite">
+    <div className="coach-progress"><span>Guided tour</span><div>{tourStops.map((_, index) => <i key={index} className={index <= step ? "active" : ""} />)}</div><button onClick={close} aria-label="Exit guided tour"><X size={15} /></button></div>
+    <span className="coach-step">{step + 1} of {tourStops.length} · {stop.label}</span>
+    <h2>{stop.title}</h2><p>{stop.copy}</p>
+    <div className="coach-actions"><button onClick={close}>Exit tour</button><button onClick={next}>{step === tourStops.length - 1 ? "Finish" : "Next"}<ArrowRight size={14} /></button></div>
+  </aside>;
+}
+
 export function App() {
   const [view, setView] = useState<View>("overview");
   const [runs, setRuns] = useState(seedRuns);
@@ -206,17 +260,25 @@ export function App() {
   const [menu, setMenu] = useState(false);
   const [connect, setConnect] = useState(false);
   const [toast, setToast] = useState("");
+  const [guideOpen, setGuideOpen] = useState(true);
+  const [tourStep, setTourStep] = useState<number | null>(null);
   const pending = reviews.filter((review) => !review.decision).length;
   function notify(text: string) { setToast(text); window.setTimeout(() => setToast(""), 2400); }
   function go(next: View) { setView(next); setMenu(false); window.scrollTo({ top: 0, behavior: "smooth" }); }
   function addRun(run: Run) { setRuns((current) => [run, ...current.filter((item) => item.id !== run.id)]); notify("Simulation added to live runs"); }
   function decide(id: string, decision: "approved" | "changes") { setReviews((current) => current.map((item) => item.id === id ? { ...item, decision } : item)); notify(decision === "approved" ? "Output approved" : "Changes requested"); }
   function reset() { setRuns(seedRuns); setReviews(seedReviews); setSelected(null); go("overview"); notify("Demo workspace reset"); }
+  function startTour() { setGuideOpen(false); setTourStep(0); go(tourStops[0].view); }
+  function advanceTour() {
+    if (tourStep === null) return;
+    if (tourStep === tourStops.length - 1) { setTourStep(null); go("overview"); notify("Tour complete. The workspace is yours."); return; }
+    const next = tourStep + 1; setTourStep(next); go(tourStops[next].view);
+  }
   const meta = viewMeta[view];
   return <div className="app-shell">
     <aside className={menu ? "sidebar open" : "sidebar"}><div className="brand"><span><ShieldCheck /></span><div><strong>TraceGuard</strong><small>Agent operations</small></div><button className="mobile-close" aria-label="Close navigation" onClick={() => setMenu(false)}><X /></button></div><nav><p>Workspace</p>{navigation.map(({ id, label, icon: Icon }) => <button key={id} className={view === id ? "active" : ""} onClick={() => go(id)}><Icon size={17} /><span>{label}</span>{id === "reviews" && pending > 0 && <b>{pending}</b>}</button>)}</nav><div className="sidebar-bottom"><div className="demo-status"><span><i />Demo mode</span><small>No keys · No API calls</small></div><a href="https://github.com/gauravch-code/TraceGuard" target="_blank" rel="noreferrer"><GitFork size={16} /><span>View source</span><ExternalLink size={13} /></a></div></aside>
     {menu && <button className="mobile-scrim" aria-label="Close navigation" onClick={() => setMenu(false)} />}
-    <main className="main-shell"><header className="topbar"><button className="mobile-menu" aria-label="Open navigation" onClick={() => setMenu(true)}><Menu /></button><div className="workspace-label"><span className="workspace-mark">TG</span><div><strong>Demo workspace</strong><small>Interactive sample data</small></div></div><div className="top-actions"><span className="live-pill"><i />Live simulation</span><button className="icon-button reset-button" title="Reset demo" onClick={reset}><RotateCcw size={17} /></button><a className="github-button" href="https://github.com/gauravch-code/TraceGuard" target="_blank" rel="noreferrer"><GitFork size={16} /><span>GitHub</span></a></div></header>
+    <main className="main-shell"><header className="topbar"><button className="mobile-menu" aria-label="Open navigation" onClick={() => setMenu(true)}><Menu /></button><div className="workspace-label"><span className="workspace-mark">TG</span><div><strong>Demo workspace</strong><small>Interactive sample data</small></div></div><div className="top-actions"><button className="guide-button" onClick={() => setGuideOpen(true)}><BookOpen size={15} /><span>How it works</span></button><span className="live-pill"><i />Live simulation</span><button className="icon-button reset-button" title="Reset demo" onClick={reset}><RotateCcw size={17} /></button><a className="github-button" href="https://github.com/gauravch-code/TraceGuard" target="_blank" rel="noreferrer"><GitFork size={16} /><span>GitHub</span></a></div></header>
       <div className="content"><div className="page-heading"><div><p>{meta.eyebrow}</p><h1>{meta.title}</h1><span>{meta.description}</span></div>{view === "overview" && <button className="primary-button" onClick={() => go("lab")}><Play size={16} />Run simulation</button>}</div>
         {view === "overview" && <Overview runs={runs} pending={pending} go={go} openRun={setSelected} />}
         {view === "lab" && <RunLab addRun={addRun} openRun={setSelected} />}
@@ -227,6 +289,8 @@ export function App() {
     </main>
     {selected && <TraceDrawer run={selected} close={() => setSelected(null)} />}
     {connect && <ConnectModal close={() => setConnect(false)} notify={notify} />}
+    {guideOpen && <WelcomeGuide close={() => setGuideOpen(false)} start={startTour} />}
+    {tourStep !== null && <TourCoach step={tourStep} next={advanceTour} close={() => setTourStep(null)} />}
     {toast && <div className="toast"><CheckCircle2 size={17} />{toast}</div>}
   </div>;
 }
